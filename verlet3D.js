@@ -19,12 +19,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 window.requestAnimFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
     window.setTimeout(callback, 1000 / 60);
 };
 
-function Verlet3D(settings) {
+var Verlet3D = function(settings) {
     this.canvas = settings.canvas;
     this.ctx = canvas.getContext("2d");
 
@@ -71,71 +70,70 @@ function Verlet3D(settings) {
     this.canvas.oncontextmenu = function(e) {
         e.preventDefault();
     };
-}
+};
 
 
 Verlet3D.prototype.rotateCamera = function(object) {
     object.model.angleY += object.y || 0;
     object.model.angleX += object.x || 0;
     object.model.angleZ += object.z || 0;
-
-}
+};
 
 Verlet3D.prototype.calc3D = function(model) {
     //reset vertex array
     model.vertex = [];
 
     //add particles to vertex array
-    for (i = 0; i < model.particles.length; i++) {
+    for (var i = 0; i < model.particles.length; i++) {
         model.vertex.push({
             x: model.particles[i].x,
             y: model.particles[i].y,
             z: model.particles[i].z
-        })
+        });
     }
 
-    for (i = 0; i < model.vertex.length; i++) {
-        data = model.vertex[i];
-        x = data.x * model.scale;
-        y = data.y * model.scale;
-        z = data.z * model.scale;
+    for (var i = 0; i < model.vertex.length; i++) {
+        var data = model.vertex[i];
+        var x = data.x * model.scale;
+        var y = data.y * model.scale;
+        var z = data.z * model.scale;
 
         //rotation
-        xcosa = Math.cos(model.angleX);
-        xsina = Math.sin(model.angleX);
-        ycosa = Math.cos(model.angleY);
-        ysina = Math.sin(model.angleY);
-        zcosa = Math.cos(model.angleZ);
-        zsina = Math.sin(model.angleZ);
+        var xcosa = Math.cos(model.angleX);
+        var xsina = Math.sin(model.angleX);
+        var ycosa = Math.cos(model.angleY);
+        var ysina = Math.sin(model.angleY);
+        var zcosa = Math.cos(model.angleZ);
+        var zsina = Math.sin(model.angleZ);
 
         //3D calculation
-        xy = xcosa * y - xsina * z; //x
-        xz = xsina * y + xcosa * z;
+        var xy = xcosa * y - xsina * z; //x
+        var xz = xsina * y + xcosa * z;
 
-        yz = ycosa * xz - ysina * x; //y
-        yx = ysina * xz + ycosa * x;
+        var yz = ycosa * xz - ysina * x; //y
+        var yx = ysina * xz + ycosa * x;
 
-        zx = zcosa * yx - zsina * xy; //z
-        zy = zsina * yx + zcosa * xy;
+        var zx = zcosa * yx - zsina * xy; //z
+        var zy = zsina * yx + zcosa * xy;
 
         //update vertex
         data.x = zx;
         data.y = zy;
         data.z = yz;
     }
-}
+};
 
 Verlet3D.prototype.calcVerlet = function(model) {
 
     //particles first...
-    for (i = 0; i < model.particles.length; i++) {
+    for (var i = 0; i < model.particles.length; i++) {
 
-        data = model.particles[i];
-        dx = data.x - data.ox;
-        dy = data.y - data.oy;
-        dz = data.z - data.oz;
+        var data = model.particles[i];
+        var dx = data.x - data.ox;
+        var dy = data.y - data.oy;
+        var dz = data.z - data.oz;
 
-        if (data.lock == 0) {
+        if (data.lock === 0) {
             data.ox = data.x;
             data.oy = data.y;
             data.oz = data.z;
@@ -150,24 +148,24 @@ Verlet3D.prototype.calcVerlet = function(model) {
     }
 
     //..and then constraints
-    for (i = 0; i < model.iterations; i++) {
+    for (var i = 0; i < model.iterations; i++) {
 
-        for (c = 0; c < model.constraints.length; c++) {
+        for (var c = 0; c < model.constraints.length; c++) {
 
-            c1 = model.particles[model.constraints[c].f];
-            c2 = model.particles[model.constraints[c].s];
+            var c1 = model.particles[model.constraints[c].f];
+            var c2 = model.particles[model.constraints[c].s];
 
-            diffx = c1.x - c2.x;
-            diffy = c1.y - c2.y;
-            diffz = c1.z - c2.z;
+            var diffx = c1.x - c2.x;
+            var diffy = c1.y - c2.y;
+            var diffz = c1.z - c2.z;
 
-            dist = Math.sqrt(diffx * diffx + diffy * diffy + diffz * diffz);
-            diff = (model.constraints[c].dist - dist) / dist;
+            var dist = Math.sqrt(diffx * diffx + diffy * diffy + diffz * diffz);
+            var diff = (model.constraints[c].dist - dist) / dist;
 
 
-            dx = diffx * 0.5;
-            dy = diffy * 0.5;
-            dz = diffz * 0.5;
+            var dx = diffx * 0.5;
+            var dy = diffy * 0.5;
+            var dz = diffz * 0.5;
 
             c1.x = c1.x + dx * diff;
             c1.y = c1.y + dy * diff;
@@ -182,7 +180,7 @@ Verlet3D.prototype.calcVerlet = function(model) {
             }
         }
     }
-}
+};
 
 var Model = function(settings) {
     this.vertex = [];
@@ -200,9 +198,7 @@ var Model = function(settings) {
     this.iterations = settings.iterations || 5;
     this.tear_distance = settings.tearDistance || 120;
     this.field_of_view = settings.fov || 1500;
-
-    this.zMax = 0;
-}
+};
 
 Model.prototype.createParticle = function(vx, vy, vz, lockstate) {
     this.particles.push({
@@ -213,8 +209,8 @@ Model.prototype.createParticle = function(vx, vy, vz, lockstate) {
         oy: vy,
         oz: vz,
         lock: (lockstate || 0)
-    })
-}
+    });
+};
 
 Model.prototype.createConstraint = function(first, second) {
     this.constraints.push({
@@ -224,15 +220,15 @@ Model.prototype.createConstraint = function(first, second) {
             Math.pow(this.particles[first].x - this.particles[second].x, 2) +
             Math.pow(this.particles[first].y - this.particles[second].y, 2) +
             Math.pow(this.particles[first].z - this.particles[second].z, 2))
-    })
-}
+    });
+};
 
 Model.prototype.createConstraintsBasedOnDistance = function(distance) {
-    for (i = 0; i < this.particles.length; i++) {
+    for (var i = 0; i < this.particles.length; i++) {
 
-        for (c = i + 1; c < this.particles.length; c++) {
+        for (var c = i + 1; c < this.particles.length; c++) {
 
-            dist = Math.sqrt(
+            var dist = Math.sqrt(
                 Math.pow(this.particles[i].x - this.particles[c].x, 2) +
                 Math.pow(this.particles[i].y - this.particles[c].y, 2) +
                 Math.pow(this.particles[i].z - this.particles[c].z, 2));
@@ -244,27 +240,27 @@ Model.prototype.createConstraintsBasedOnDistance = function(distance) {
 
         }
     }
-}
+};
 
-Verlet3D.prototype.draw3D = function(models) {
-    if (models.constructor !== Array) models = [models];
+Verlet3D.prototype.draw3D = function(dmodels) {
+    if (dmodels.constructor !== Array) var dmodels = [dmodels];
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.beginPath();
 
-    for (modeln = 0; modeln < models.length; modeln++) {
-        model = models[modeln];
-        for (i = 0; i < model.constraints.length; i++) {
+    for (var modeln = 0; modeln < dmodels.length; modeln++) {
+        var model = dmodels[modeln];
+        for (var i = 0; i < model.constraints.length; i++) {
 
-            for (c = 0; c < 2; c++) {
+            for (var c = 0; c < 2; c++) {
                 //calculate fov
-                data = (c == 1) ? model.vertex[model.constraints[i].f] : model.vertex[model.constraints[i].s];
+                var data = (c == 1) ? model.vertex[model.constraints[i].f] : model.vertex[model.constraints[i].s];
 
-                fov = model.field_of_view / (model.field_of_view + data.z);
+                var fov = model.field_of_view / (model.field_of_view + data.z);
 
-                x = data.x * fov + model.xPos;
-                y = data.y * fov + model.yPos;
+                var x = data.x * fov + model.xPos;
+                var y = data.y * fov + model.yPos;
 
-                if (c == 0) {
+                if (c === 0) {
                     this.ctx.moveTo(x, y);
                 } else {
                     this.ctx.lineTo(x, y);
@@ -274,28 +270,27 @@ Verlet3D.prototype.draw3D = function(models) {
     }
     this.ctx.closePath();
     this.ctx.stroke();
-}
+};
 
 
-Verlet3D.prototype.findClosest = function(models) {
-    if (models.constructor !== Array) models = [models];
+Verlet3D.prototype.findClosest = function(fmodels) {
+    if (fmodels.constructor !== Array) var fmodels = [fmodels];
     this.smallest = 1000000;
     this.highestZ = -1000000;
-    for (modeln = 0; modeln < models.length; modeln++) {
-        modeldata = models[modeln];
-        modeldata.zMax = 0;
-        for (i = 0; i < model.vertex.length; i++) {
+    for (var modeln = 0; modeln < fmodels.length; modeln++) {
 
+        var modeldata = fmodels[modeln];
 
-            data = modeldata.vertex[i];
-            //save highest z value for mouse distance calculation @ findClosest()
+        for (var i = 0; i < fmodels[modeln].vertex.length; i++) {
 
-            fov = modeldata.field_of_view / (modeldata.field_of_view + data.z);
+            var data = modeldata.vertex[i];
 
-            x = data.x * fov + modeldata.xPos;
-            y = data.y * fov + modeldata.yPos;
+            var fov = modeldata.field_of_view / (modeldata.field_of_view + data.z);
 
-            dist = Math.sqrt(
+            var x = data.x * fov + modeldata.xPos;
+            var y = data.y * fov + modeldata.yPos;
+
+            var dist = Math.sqrt(
                 Math.pow(x - (this.mouse.x), 2) +
                 Math.pow(y - (this.mouse.y), 2));
             if (dist < this.smallest && dist < 10 && data.z > this.highestZ) {
@@ -311,25 +306,25 @@ Verlet3D.prototype.findClosest = function(models) {
     return {
         particle: this.smallestparticle,
         model: this.model
-    }
-}
+    };
+};
 
-Verlet3D.prototype.handleMouse = function(models) {
-    if (models.constructor !== Array) models = [models];
-    if (this.mouse.down == true) {
+Verlet3D.prototype.handleMouse = function(mmodels) {
+    if (mmodels.constructor !== Array) var mmodels = [mmodels];
+    if (this.mouse.down === true) {
         this.mouse.clicked = 1;
         if (this.draggedParticle == -1) {
-            data = this.findClosest(models);
-            if (data == 0) return;
-            model = models[data.model];
-            pdata = models[data.model].vertex[data.particle];
+            var data = this.findClosest(mmodels);
+            if (data === 0) return;
+            var model = mmodels[data.model];
+            var pdata = mmodels[data.model].vertex[data.particle];
         } else {
-            model = models[this.draggedModel];
-            pdata = models[this.draggedModel].vertex[this.draggedParticle];
+            var model = mmodels[this.draggedModel];
+            var pdata = mmodels[this.draggedModel].vertex[this.draggedParticle];
         }
-        fov = model.field_of_view / (model.field_of_view + pdata.z);
-        x = pdata.x * fov + model.xPos;
-        y = pdata.y * fov + model.yPos;
+        var fov = model.field_of_view / (model.field_of_view + pdata.z);
+        var x = pdata.x * fov + model.xPos;
+        var y = pdata.y * fov + model.yPos;
         this.ctx.beginPath();
         this.ctx.arc(x, y, 5, 5, 0, Math.PI * 2);
         this.ctx.closePath();
@@ -345,7 +340,7 @@ Verlet3D.prototype.handleMouse = function(models) {
         }
 
         if (this.mouse.button == 3) {
-            for (c = 0; c < model.constraints.length; c++) {
+            for (var c = 0; c < model.constraints.length; c++) {
                 if (model.constraints[c].f == data.particle || model.constraints[c].s == data.particle) {
                     model.constraints.splice(c, 1);
                 }
@@ -357,16 +352,16 @@ Verlet3D.prototype.handleMouse = function(models) {
             model.angleY += (this.mouse.x - this.mouse.ox) / 25;
         }
     } else {
-        data = this.findClosest(models);
-        if (data == 0) return;
-        model = models[data.model];
-        pdata = models[data.model].vertex[data.particle];
-        fov = model.field_of_view / (model.field_of_view + pdata.z);
-        x = pdata.x * fov + model.xPos;
-        y = pdata.y * fov + model.yPos;
+        var data = this.findClosest(mmodels);
+        if (data === 0) return;
+        var model = mmodels[data.model];
+        var pdata = mmodels[data.model].vertex[data.particle];
+        var fov = model.field_of_view / (model.field_of_view + pdata.z);
+        var x = pdata.x * fov + model.xPos;
+        var y = pdata.y * fov + model.yPos;
         this.ctx.beginPath();
         this.ctx.arc(x, y, 5, 5, 0, Math.PI * 2);
         this.ctx.closePath();
         this.ctx.stroke();
     }
-}
+};
